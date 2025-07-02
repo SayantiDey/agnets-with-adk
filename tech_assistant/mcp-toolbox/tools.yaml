@@ -1,1 +1,54 @@
+sources:
+ my-cloud-sql-source:
+   kind: cloud-sql-postgres
+   project: ${GCP_PROJECT_ID}
+   region: us-central1
+   instance: supportcase-db
+   database: postgres
+   user: ${DB_USER}
+   password: ${DB_PASSWORD}
 
+tools:
+ search-status-by-ticket_id:
+   kind: postgres-sql
+   source: my-cloud-sql-source
+   description: Search for support ticket status based on ticket id.
+   parameters:
+     - name: ticket_id
+       type: string
+       description: 1 to 4 digit number.
+   statement: SELECT * FROM cases WHERE ticket_id = $1;
+
+ create-new-ticket:
+    kind: postgres-sql
+    source: my-cloud-sql-source
+    description: Create a new support ticket.
+    parameters:
+      - name: title
+        type: string
+        description: The title of the new support ticket.
+      - name: description
+        type: string
+        description: A detailed description of the issue or query.
+      - name: error_msg
+        type: string
+        description: (Optional) Error message received.
+      - name: steps_taken
+        type: string
+        description: (Optional) What have you already tried to resolve this issue?
+      - name: priority
+        type: string
+        description: (Optional) The priority of the ticket. Can be 'P0 - critical', 'P1 - high', 'P2 - medium', or 'P3 - Low'. Default is 'P3 - Low'.
+      - name: status
+        type: string
+        description: (Optional) The initial status of the ticket. Default is 'Open'.
+      - name: contact
+        type: string
+        description: Email id.
+    statement: INSERT INTO cases (title, description, error_msg, steps_taken, contact, priority, status) VALUES ($1, $2, $3, $4, $5, COALESCE($6, 'P3 - Low'), COALESCE($7, 'Open')) RETURNING ticket_id;
+
+
+toolsets:
+   my_toolset:
+     - search-status-by-ticket_id
+     - create-new-ticket
