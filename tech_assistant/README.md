@@ -12,7 +12,7 @@ This README contains instructions for local and Cloud Run deployment.
 
 ## Agent Flow
 
-<img src="deployment/images/architecture.svg" width="50%" alt="Architecture">
+<img src="architecture.png" width="50%" alt="Architecture">
 
 ## Key Features
 
