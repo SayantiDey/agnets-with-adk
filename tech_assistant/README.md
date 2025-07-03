@@ -1,6 +1,6 @@
-#Tech Assistant for Brainstorming & Support- using MCP Toolbox for Databases and Agent Development Kit (ADK)  
+# Tech Assistant for Brainstorming & Support- using MCP Toolbox for Databases and Agent Development Kit (ADK)  
 
-## Overview
+## Overview 
 Praxis-The Tech Assistant is a sample agent designed to assist with the full lifecycle of technical work—from ideation to resolution. 
 This sample agent uses ADK (Agent Development Kit), a PostgreSQL support case database, google search, MCP Toolbox, and deployed on Cloud Run.
 
