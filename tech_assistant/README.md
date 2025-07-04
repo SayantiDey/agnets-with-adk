@@ -1,4 +1,4 @@
-# Praxis- A Tech Assistant for Brainstorming & Support
+# Praxis-Multi-Agent AI Assistant for Brainstorming & Support.
 ## Overview 
 The Tech Assistant is a sample agent designed to assist with the full lifecycle of technical work—from ideation to resolution. 
 This sample agent uses ADK (Agent Development Kit), a PostgreSQL support case database, google search, MCP Toolbox, and deployed on Cloud Run.
@@ -66,18 +66,19 @@ Once created, you can view your instance in the Cloud Console.
 
 ```SQL
 CREATE TABLE cases (
-    ticket_id SERIAL PRIMARY KEY,             AUTO_INCREMENT)
-    title VARCHAR(255) NOT NULL,              -- A concise summary or title of the bug/issue.
-    description TEXT,                         -- A detailed description of the bug.
-    assignee VARCHAR(100),                    -- The name or email of the person/team assigned to the ticket.
-    priority VARCHAR(50),                     -- The priority level (e.g., 'P0 - Critical', 'P1 - High').
-    status VARCHAR(50) DEFAULT 'Open',        -- The current status of the ticket (e.g., 'Open', 'In Progress', 'Resolved'). Default is 'Open'.
-    creation_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Timestamp when the ticket was first created. 'WITH TIME ZONE' is recommended for clarity and compatibility.
-    updated_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  -- Timestamp when the ticket was last updated. Will be managed by a trigger.
+    ticket_id SERIAL PRIMARY KEY,             
+    title VARCHAR(200) NOT NULL,              
+    description TEXT,                         
+    steps_taken VARCHAR(100),                    
+    priority VARCHAR(20) DEFAULT 'p3-low',  
+    error_msg VARCHAR(100), 
+    status VARCHAR(50) DEFAULT 'Open',  
+    contact VARCHAR(100) NOT NULL ,
+    creation_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, 
 );
 ```
 
-### 5 - Load in sample data. 
+- Add sample data to the table. 
 
 From Cloud SQL Studio, paste in the following SQL code to load in sample data.
 
@@ -111,30 +112,6 @@ INSERT INTO tickets (title, description, assignee, priority, status) VALUES
 
 INSERT INTO tickets (title, description, assignee, priority, status) VALUES
 ('Intermittent File Upload Failures for Large Files', 'Users are intermittently reporting that file uploads fail without a clear error message or explanation, especially for files exceeding 10MB in size.', 'frank.white@example.com', 'P1 - High', 'Open');
-```
-
-### 6 - Create a trigger to update the `updated_time` field when a record is updated.
-
-```SQL
-CREATE OR REPLACE FUNCTION update_updated_time_tickets()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_time = NOW();  -- Set the updated_time to the current timestamp
-    RETURN NEW;                -- Return the new row
-END;
-$$ language 'plpgsql';        
-
-CREATE TRIGGER update_tickets_updated_time
-BEFORE UPDATE ON tickets
-FOR EACH ROW                  -- This means the trigger fires for each row affected by the UPDATE statement
-EXECUTE PROCEDURE update_updated_time_tickets();
-```
-
-
-### 7 - Create vector embeddings from the `description` field.
-
-```SQL
-ALTER TABLE tickets ADD COLUMN embedding vector(768) GENERATED ALWAYS AS (embedding('text-embedding-005',description)) STORED;
 ```
 
 ### 8 - Verify that the database is ready.
