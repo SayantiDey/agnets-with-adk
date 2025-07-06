@@ -97,7 +97,7 @@ VALUES
 From Cloud SQL studio, run:
 
 ```SQL
-SELECT * FROM tickets;
+SELECT * FROM cases;
 ```
 
 
