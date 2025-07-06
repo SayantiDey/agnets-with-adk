@@ -187,117 +187,31 @@ toolbox = ToolboxTool("CLOUD_RUN_SERVICE_URL")
 ```bash
 export GOOGLE_CLOUD_PROJECT=YOUR_GOOGLE_CLOUD_PROJECT_ID
 export GOOGLE_CLOUD_LOCATION=us-central1
-export AGENT_PATH="hotel-agent-app/"
-export SERVICE_NAME="hotels-service"
-export APP_NAME="hotels-app"
+export AGENT_PATH="tech-assistant/"
+export SERVICE_NAME="praxis"
+export APP_NAME="my-tech-assistant"
 export GOOGLE_GENAI_USE_VERTEXAI=True
 ```
-
-Now we can deploy Toolbox to Cloud Run. We'll use the latest [release version](https://github.com/googleapis/genai-toolbox/releases) of the MCP Toolbox image (we don't need to build or deploy the `toolbox` from source.)
-
-```bash
-gcloud run deploy toolbox \
-    --image us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:latest \
-    --service-account toolbox-identity \
-    --region us-central1 \
-    --set-secrets "/app/tools.yaml=tools:latest" \
-    --set-env-vars="PROJECT_ID=$PROJECT_ID,DB_USER=postgres,DB_PASS=admin" \
-    --args="--tools-file=/app/tools.yaml","--address=0.0.0.0","--port=8080" \
-    --allow-unauthenticated
-```
-
-Verify that the Toolbox is running by getting the Cloud Run logs: 
-
-```bash 
-gcloud run services logs read toolbox --region us-central1
-```
-
-You should see: 
+- Deploy the Agent Application to Cloud Run via the adk deploy cloud_run command as given below. If you are asked to allow unauthenticated invocations to the service, please provide "y" as the value for now.
 
 ```bash
-2025-05-15 18:03:55 2025-05-15T18:03:55.465847801Z INFO "Initialized 1 sources."
-2025-05-15 18:03:55 2025-05-15T18:03:55.466152914Z INFO "Initialized 0 authServices."
-2025-05-15 18:03:55 2025-05-15T18:03:55.466374245Z INFO "Initialized 9 tools."
-2025-05-15 18:03:55 2025-05-15T18:03:55.466477938Z INFO "Initialized 2 toolsets."
-2025-05-15 18:03:55 2025-05-15T18:03:55.467492303Z INFO "Server ready to serve!"
+adk deploy cloud_run \
+--project=$GOOGLE_CLOUD_PROJECT \
+--region=$GOOGLE_CLOUD_LOCATION \
+--service_name=$SERVICE_NAME  \
+--app_name=$APP_NAME \
+--with_ui \
+$AGENT_PATH
 ```
 
-Save the Cloud Run URL for the Toolbox service as an environment variable.
-
-```bash
-export MCP_TOOLBOX_URL=$(gcloud run services describe toolbox --region us-central1 --format "value(status.url)")
-```
-
-Now we are ready to deploy the ADK Python agent to Cloud Run! :rocket:
-
-### 10 - Create an Artifact Registry repository.
-
-This is where we'll store the agent container image.
-
-```bash
-gcloud artifacts repositories create adk-samples \
-  --repository-format=docker \
-  --location=us-central1 \
-  --description="Repository for ADK Python sample agents" \
-  --project=$PROJECT_ID
-```
-
-### 11 - Containerize the ADK Python agent. 
-
-Build the container image and push it to Artifact Registry with Cloud Build.
-
-```bash
-gcloud builds submit --region=us-central1 --tag us-central1-docker.pkg.dev/$PROJECT_ID/adk-samples/software-bug-assistant:latest
-```
-
-### 12 - Deploy the agent to Cloud Run 
-
-
-> [!NOTE]    
-> 
-> If you are using Vertex AI instead of AI Studio for Gemini calls, you will need to replace `GOOGLE_API_KEY` with `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, and `GOOGLE_GENAI_USE_VERTEXAI=TRUE` in the last line of the below `gcloud run deploy` command.
-> 
-> ```bash
-> --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1,GOOGLE_GENAI_USE_VERTEXAI=TRUE,MCP_TOOLBOX_URL=$MCP_TOOLBOX_URL,GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN
-> ```
-
-```bash
-gcloud run deploy software-bug-assistant \
-  --image=us-central1-docker.pkg.dev/$PROJECT_ID/adk-samples/software-bug-assistant:latest \
-  --region=us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars=GOOGLE_API_KEY=$GOOGLE_API_KEY,MCP_TOOLBOX_URL=$MCP_TOOLBOX_URL,GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN 
-```
-
-When this runs successfully, you should see: 
-
-```bash
-Service [software-bug-assistant] revision [software-bug-assistant-00001-d4s] has been deployed and is serving 100 percent of traffic.
-```
-
-
-### 13 - Test the Cloud Run Agent
+10. Test the Cloud Run Agent
 
 Open the Cloud Run Service URL outputted by the previous step. 
-
-You should see the ADK Web UI for the Software Bug Assistant. 
+You should see the ADK Web UI for the Praxis- Tech Assistant. 
 
 Test the agent by asking questions like: 
-- `Any issues around database timeouts?` 
-- `How many bugs are assigned to samuel.green@example.com? Show a table.` 
-- `What are some possible root-causes for the unresponsive login page issue?` (Invoke Google Search tool)
-- `Get the bug ID for the unresponsive login page issues` --> `Boost that bug's priority to P0.`. 
-- `Create a new bug.` (let the agent guide you through bug creation)
+- `I want to build a build a voice chat bot using GCP. How can I do that?` 
+- `I want to check status of my support ticket. Ticket id -3` 
+- `I am getting 429 error when trying to using gemini models from vertex ai` 
+- `I want to create a new support ticket`. 
 
-*Example workflow*: 
-
-![](deployment/images/cloud-run-example.png)
-
-
-### Clean up 
-
-You can clean up this agent sample by: 
-- Deleting the [Artifact Registry](https://console.cloud.google.com/artifacts). 
-- Deleting the two [Cloud Run Services](https://console.cloud.google.com/run). 
-- Deleting the [Cloud SQL instance](https://console.cloud.google.com/sql/instances). 
-- Deleting the [Secret Manager secret](https://console.cloud.google.com/security/secret-manager). 
