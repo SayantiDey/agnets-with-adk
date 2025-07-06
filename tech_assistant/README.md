@@ -121,13 +121,14 @@ sources:
 ./toolbox --tools-file "tools.yaml"
 ```
 Ideally you should see an output that the Server has been able to connect to our data sources and has loaded the toolset and tools. A sample output:
+```bash
 ./toolbox --tools-file "tools.yaml"
 2025-04-23T14:32:29.564903079Z INFO "Initialized 1 sources." 
 2025-04-23T14:32:29.565009291Z INFO "Initialized 0 authServices." 
 2025-04-23T14:32:29.565070176Z INFO "Initialized 2 tools." 
 2025-04-23T14:32:29.565120847Z INFO "Initialized 2 toolsets." 
 2025-04-23T14:32:29.565510068Z INFO "Server ready to serve!" 
-
+```
 7. Run the Agent Locally to verify
 - Once the MCP server has started successfully, in another terminal, launch the Agent (from the tech_assistant folder) with command shown below.
 ```bash
