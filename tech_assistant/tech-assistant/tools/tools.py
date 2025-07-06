@@ -47,7 +47,7 @@ Follow these steps to provide guidance:
     *   Focus on finding official documentation, help articles, forum discussions, and blog posts from reputable sources.
 3.  Provide guidance based on the search results:
     *   Summarize the most relevant information from the search results.
-    *   Provide step-by-step instructions or recommendations based on the solutions found in the search results.
+    *   Provide step-by-step instructions along with a diagram or recommendations based on the solutions found in the search results.
     *   Include links to the original sources for the user to refer to.
 4.  If you cannot find relevant information:
     *   If your search does not yield any helpful results, inform the user that you could not find a solution.
