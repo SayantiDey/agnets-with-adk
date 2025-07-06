@@ -218,6 +218,6 @@ You should see the ADK Web UI for the Praxis- Tech Assistant.
 Test the agent by asking questions like: 
 - `I wanto to build a mobile app that helps people reduce their daily screen time and improve digital wellness. Can you help brainstorm?` 
 - `I want to check status of my support ticket. Ticket id -3` 
-- `I am getting 429 error when trying to using gemini models from vertex ai` 
+- `I am unable to strat my vm in GCP` 
 - `I want to create a new support ticket`. 
 
