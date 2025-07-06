@@ -181,7 +181,7 @@ You can now visit the Service URL listed in the output in the browser. It should
 9. Deploy the Agent on Cloud Run
 - Go to tech_assistant/tech-assistant/agent.py and point to the Toolbox service URL that is running on Cloud Run
 ```bash
-toolbox = ToolboxTool("CLOUD_RUN_SERVICE_URL")
+TOOLBOX_URL = os.getenv("MCP_TOOLBOX_URL", "PUT THE Cloud RUN SERVICE URL HERE")
 ```
 - Navigate to the tech_assistant folder and let's set the following environment variables first:
 
