@@ -92,7 +92,7 @@ VALUES
 ('GKE Autopilot not scaling up', 'GKE Autopilot cluster is not scaling pods for the ''payment-gateway'' deployment during peak load.', NULL, 'Checked HorizontalPodAutoscaler logs and resource limits.', 'p2-medium', 'Open', 'a.smith@sample.org');
 ```
 
-### 8 - Verify that the database is ready.
+- Verify that the database is ready.
 
 From Cloud SQL studio, run:
 
@@ -100,50 +100,97 @@ From Cloud SQL studio, run:
 SELECT * FROM tickets;
 ```
 
-You should see: 
 
-<img src="deployment/images/verify-db.png" width="80%" alt="Verify database table">
+6. Run the MCP Toolbox for Databases Server Locally to verify
 
-
-### 9 - Deploy the MCP Toolbox for Databases server to Cloud Run 
-
-Now that we have a Cloud SQL database, we can deploy the MCP Toolbox for Databases server to Cloud Run and point it at our Cloud SQL instance.
-
-First, update `deployment/mcp-toolbox/tools.yaml` for your Cloud SQL instance: 
+- First, update `mcp-toolbox/tools.yaml` for your Cloud SQL instance: 
 
 ```yaml
-  postgresql:
-    kind: cloud-sql-postgres
-    project: ${PROJECT_ID}
-    region: us-central1
-    instance: software-assistant
-    database: tickets-db
-    user: ${DB_USER}
-    password: ${DB_PASS}
+sources:
+ my-cloud-sql-source:
+   kind: cloud-sql-postgres
+   project: ${GCP_PROJECT_ID}
+   region: us-central1
+   instance: supportcase-db
+   database: postgres
+   user: ${DB_USER}
+   password: ${DB_PASSWORD}
 ```
+- Run the following command (from the mcp-toolbox folder) to start the server:
+```bash
+./toolbox --tools-file "tools.yaml"
+```
+Ideally you should see an output that the Server has been able to connect to our data sources and has loaded the toolset and tools. A sample output:
+./toolbox --tools-file "tools.yaml"
+2025-04-23T14:32:29.564903079Z INFO "Initialized 1 sources." 
+2025-04-23T14:32:29.565009291Z INFO "Initialized 0 authServices." 
+2025-04-23T14:32:29.565070176Z INFO "Initialized 2 tools." 
+2025-04-23T14:32:29.565120847Z INFO "Initialized 2 toolsets." 
+2025-04-23T14:32:29.565510068Z INFO "Server ready to serve!" 
 
-Then, configure Toolbox's Cloud Run service account to access both Secret Manager and Cloud SQL. Secret Manager is where we'll store our `tools.yaml` file because it contains sensitive Cloud SQL credentials. 
+7. Run the Agent Locally to verify
+- Once the MCP server has started successfully, in another terminal, launch the Agent (from the tech_assistant folder) with command shown below.
+```bash
+uv run adk web
+```
+8. Host MCP Toolbox server on Cloud Run
+- Launch a new Cloud Shell Terminal or use an existing Cloud Shell Terminal. Go to the mcp-toolbox folder, in which the toolbox binary and tools.yaml are present.
+- Set the PROJECT_ID variable to point to your Google Cloud Project Id.
 
-Note - run this from the top-level `software-bug-assistant/` directory. 
-
+```bash
+export PROJECT_ID="YOUR_GOOGLE_CLOUD_PROJECT_ID" 
+```
+- verify that the following Google Cloud services are enabled in the project.
 ```bash 
 gcloud services enable run.googleapis.com \
-   cloudbuild.googleapis.com \
-   artifactregistry.googleapis.com \
-   iam.googleapis.com \
-   secretmanager.googleapis.com
-                       
+                       cloudbuild.googleapis.com \
+                       artifactregistry.googleapis.com \
+                       iam.googleapis.com \
+                       secretmanager.googleapis.com
+```
+- create a separate service account that will be acting as the identity for the Toolbox service that we will be deploying on Google Cloud Run.
+```bash
 gcloud iam service-accounts create toolbox-identity
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member serviceAccount:toolbox-identity@$PROJECT_ID.iam.gserviceaccount.com \
-    --role roles/secretmanager.secretAccessor
+   --member serviceAccount:toolbox-identity@$PROJECT_ID.iam.gserviceaccount.com \
+   --role roles/secretmanager.secretAccessor
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member serviceAccount:toolbox-identity@$PROJECT_ID.iam.gserviceaccount.com \
-    --role roles/cloudsql.client
+   --member serviceAccount:toolbox-identity@$PROJECT_ID.iam.gserviceaccount.com \
+   --role roles/cloudsql.client
+```
+- Upload the tools.yaml file as a secret and since we have to install the Toolbox in Cloud Run, we are going to use the latest Container image for the toolbox and set that in the IMAGE variable.
+```bash
+gcloud secrets create tools --data-file=tools.yaml
+export IMAGE=us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:latest 
+```
+- Deploy to cloud Run
+```bash
+gcloud run deploy toolbox \
+--image $IMAGE \
+--service-account toolbox-identity \
+--region us-central1 \
+--set-secrets "/app/tools.yaml=tools:latest" \
+--args="--tools_file=/app/tools.yaml","--address=0.0.0.0","--port=8080" \
+--allow-unauthenticated
+```
+You can now visit the Service URL listed in the output in the browser. It should display the "Hello World" message.
 
-gcloud secrets create tools --data-file=deployment/mcp-toolbox/tools.yaml
+9. Deploy the Agent on Cloud Run
+- Go to tech_assistant/tech-assistant/agent.py and point to the Toolbox service URL that is running on Cloud Run
+```bash
+toolbox = ToolboxTool("CLOUD_RUN_SERVICE_URL")
+```
+- Navigate to the tech_assistant folder and let's set the following environment variables first:
+
+```bash
+export GOOGLE_CLOUD_PROJECT=YOUR_GOOGLE_CLOUD_PROJECT_ID
+export GOOGLE_CLOUD_LOCATION=us-central1
+export AGENT_PATH="hotel-agent-app/"
+export SERVICE_NAME="hotels-service"
+export APP_NAME="hotels-app"
+export GOOGLE_GENAI_USE_VERTEXAI=True
 ```
 
 Now we can deploy Toolbox to Cloud Run. We'll use the latest [release version](https://github.com/googleapis/genai-toolbox/releases) of the MCP Toolbox image (we don't need to build or deploy the `toolbox` from source.)
