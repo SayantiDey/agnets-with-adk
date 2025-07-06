@@ -17,7 +17,7 @@ tools:
      - name: ticket_id
        type: string
        description: 1 to 4 digit number.
-   statement: SELECT * FROM cases WHERE ticket_id = $1;
+   statement: SELECT title, priority, status FROM cases WHERE ticket_id = $1;
 
  create-new-ticket:
     kind: postgres-sql
