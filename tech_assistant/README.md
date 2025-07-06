@@ -189,8 +189,8 @@ TOOLBOX_URL = os.getenv("MCP_TOOLBOX_URL", "PUT THE Cloud RUN SERVICE URL HERE")
 export GOOGLE_CLOUD_PROJECT=YOUR_GOOGLE_CLOUD_PROJECT_ID
 export GOOGLE_CLOUD_LOCATION=us-central1
 export AGENT_PATH="tech-assistant/"
-export SERVICE_NAME="praxis"
-export APP_NAME="my-tech-assistant"
+export SERVICE_NAME="tech-assistant"
+export APP_NAME="praxis"
 export GOOGLE_GENAI_USE_VERTEXAI=True
 ```
 -Make sure the project id is set correctly.
