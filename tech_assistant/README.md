@@ -193,6 +193,11 @@ export SERVICE_NAME="praxis"
 export APP_NAME="my-tech-assistant"
 export GOOGLE_GENAI_USE_VERTEXAI=True
 ```
+-Make sure the project id is set correctly.
+```bash
+gcloud config set project <YOUR_PROJECT_ID>
+```
+
 - Deploy the Agent Application to Cloud Run via the adk deploy cloud_run command as given below. If you are asked to allow unauthenticated invocations to the service, please provide "y" as the value for now.
 
 ```bash
