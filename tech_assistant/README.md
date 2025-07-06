@@ -149,7 +149,7 @@ gcloud services enable run.googleapis.com \
                        iam.googleapis.com \
                        secretmanager.googleapis.com
 ```
-- create a separate service account that will be acting as the identity for the Toolbox service that we will be deploying on Google Cloud Run.
+- Create a service account that will be acting as the identity for the Toolbox service that we will be deploying on Google Cloud Run.
 ```bash
 gcloud iam service-accounts create toolbox-identity
 
