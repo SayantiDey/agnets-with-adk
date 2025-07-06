@@ -216,7 +216,7 @@ Open the Cloud Run Service URL outputted by the previous step.
 You should see the ADK Web UI for the Praxis- Tech Assistant. 
 
 Test the agent by asking questions like: 
-- `I want to build a build a voice chat bot using GCP. How can I do that?` 
+- `I wanto to build a mobile app that helps people reduce their daily screen time and improve digital wellness. Can you help brainstorm?` 
 - `I want to check status of my support ticket. Ticket id -3` 
 - `I am getting 429 error when trying to using gemini models from vertex ai` 
 - `I want to create a new support ticket`. 
