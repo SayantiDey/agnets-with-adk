@@ -216,6 +216,7 @@ Open the Cloud Run Service URL outputted by the previous step.
 You should see the ADK Web UI for the Praxis- Tech Assistant. 
 
 Test the agent by asking questions like: 
+- `I want to build a central 'lakehouse' on GCP to consolidate data from various sources like CRM, IoT, web logs. How can I do that?` 
 - `I wanto to build a mobile app that helps people reduce their daily screen time and improve digital wellness. Can you help brainstorm?` 
 - `I want to check status of my support ticket. Ticket id -3` 
 - `I am unable to strat my vm in GCP` 
